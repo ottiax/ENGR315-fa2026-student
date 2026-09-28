@@ -12,11 +12,29 @@ the 20-year bonds pay 4.32%, with each compounding annually.
 Note that Elon's capital will be $33B.
 """
 
-### all your code below ###
+# Elon Musk's available capital
+initial_investment = 33_000_000_000  # $33 billion
+
+# Annual Treasury bond interest rates
+ten_year_rate = 0.0396    # 3.96%
+twenty_year_rate = 0.0432 # 4.32%
+
+# Investment periods
+ten_years = 10
+twenty_years = 20
+
+# Calculate future value using annual compounding
+ten_year_final = initial_investment * (1 + ten_year_rate) ** ten_years
+
+twenty_year_final = initial_investment * (1 + twenty_year_rate) ** twenty_years
+
+# Display results
+print("10-year final value: $", ten_year_final)
+print("20-year final value: $", twenty_year_final)
 
 
 # final answer for 10-year
-ten_year_final = None
+ten_year_final = 48660509081.78675
 
 # final answer for 20-year
-twenty_year_final = None
+twenty_year_final = 76889229275.98897
