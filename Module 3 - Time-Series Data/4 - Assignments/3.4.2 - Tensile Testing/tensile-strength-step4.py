@@ -1,3 +1,6 @@
+from turtle import distance
+
+from PIL.ImageChops import offset
 import numpy as np
 import os
 import math
@@ -61,8 +64,9 @@ def calculate_stress(force, sample_diameter):
     """
 
     ### YOUR SOLUTION FROM STEP 1 TEMPLATE HERE ###
-
-    return None
+    area = math.pi * (sample_diameter / 2) ** 2
+    stress = (force * 1000) / area
+    return stress
 
 
 def calculate_max_strength_strain(strain, stress):
@@ -76,6 +80,8 @@ def calculate_max_strength_strain(strain, stress):
     """
 
     ### YOUR SOLUTION FROM STEP 2 TEMPLATE HERE ###
+    ultimate_tensile_stress = np.max(stress)
+    fracture_strain = np.max(strain)
 
     return -1, -1
 
@@ -97,6 +103,23 @@ def calculate_elastic_modulus(strain, stress):
     intercept = None
 
     ### YOUR SOLUTION FROM STEP 3 TEMPLATE HERE ###
+    secant_index = np.argmin(np.abs(stress - target_stress))
+    secant_strain = strain[secant_index]
+
+    # Calculate the secant line
+    secant_slope = target_stress / secant_strain
+    secant_line = secant_slope * strain
+
+    # Find the closest point before the 40% point
+    diffs = np.abs(stress - secant_line)
+    linear_index = np.argmin(diffs[:secant_index + 1])
+
+    # Select the linear region
+    linear_stress = stress[:linear_index + 1]
+    linear_strain = strain[:linear_index + 1]
+
+    # Fit a straight line
+    slope, intercept = np.polyfit(linear_strain, linear_stress, 1)
 
     return linear_index, slope, intercept
 
@@ -115,19 +138,24 @@ def calculate_percent_offset(slope, strain, stress):
     offset = 0.002
 
     # calculate the offset line: y=m(x-0.002) + 0
-    offset_line = None
+    offset_line = slope * (strain - offset)
 
     # measure distance from all points on graph to this line. Consider using the
     # abs() method to ensure values are positive
-    distance = None
+    distance = np.abs(stress - offset_line)
 
     # use argmin to find the index where the distance is minimal
     intercept_index = -1
+    valid_indices = np.where(strain >= offset)[0]
+    if len(valid_indices) == 0:
 
-    return offset_line, intercept_index
+    # Find the closest point to the offset line
+        intercept_index = valid_indices
+    np.argmin(distance[valid_indices])
+    
 
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    if __name__ == "__main__":
+     import matplotlib.pyplot as plt
 
     # modify this line to select different materials/folders within tensile/
     material_folder = "1045CR"

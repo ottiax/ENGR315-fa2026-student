@@ -61,6 +61,8 @@ def calculate_stress(force, sample_diameter):
     """
 
     ### YOUR SOLUTION FROM STEP 1 TEMPLATE HERE ###
+    area = math.pi * (sample_diameter / 2) ** 2
+    stress = (force * 1000) / area
 
     return None
 
@@ -76,6 +78,8 @@ def calculate_max_strength_strain(strain, stress):
     """
 
     ### YOUR SOLUTION FROM STEP 2 TEMPLATE HERE ###
+    ultimate_tensile_stress = np.max(stress)
+    fracture_strain = np.max(strain)
 
     return -1, -1
 
@@ -101,24 +105,32 @@ def calculate_elastic_modulus(strain, stress):
 
     ### your code below ###
     secant_strain = -1
+    peak_stress = np.max(stress)
+    target_stress = 0.40 * peak_stress
+    secant_index = np.argmin(np.abs(stress - target_stress))
+    secant_strain = strain[secant_index]
 
     # Step 3b: find the intersection between 40% line and the curvey
     # take the abs() difference between the stress vector and secant_strain point
 
     ### your code below ###
     diffs = -1
-
+    secant_line = (target_stress / secant_strain) * strain
+    diffs = np.abs(stress - secant_line)
     # use np.argmin() to find the minimum of the diffs array.
     # this will be the INDEX of the point in stress-strain that is closest to
     # secant_strain intersection
 
     # uncomment the line below and replace with your own
     # linear_index = ....
+    linear_index = np.argmin(diffs[:secant_index + 1])
 
     # Step 3c: down select to linear region for stress and strain
     # using list slicing. Uncomment lines below
     # linear_stress = stress[# list slice#]
     # linear_strain = strain[#list slice#]
+    linear_stress = stress[0:linear_index + 1]
+    linear_strain = strain[0:linear_index + 1]
 
     # Step 3d: find least squares fit to a line in the linear region
     # use 1-degree polynominal fit (line) from np.polyfit
@@ -126,8 +138,7 @@ def calculate_elastic_modulus(strain, stress):
 
     # uncomment the line below and call np.polyfit
     # slope, intercept = ....
-
-    return linear_index, slope, intercept
+    slope, intercept = np.polyfit(linear_strain, linear_stress, 1)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
