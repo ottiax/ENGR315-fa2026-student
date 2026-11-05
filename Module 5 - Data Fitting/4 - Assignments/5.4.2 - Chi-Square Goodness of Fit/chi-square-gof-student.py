@@ -29,7 +29,12 @@ def categorical_test(_observed, _expected, _alpha):
     reject = None
 
     # YOUR CODE HERE #
-
+def categorical_test(_observed, _expected, _alpha):
+    """
+    Chi-square goodness of fit test on counts in categories
+    """
+    chi_stat, p_value = chisquare(f_obs=_observed, f_exp=_expected)
+    reject = p_value < _alpha
     return chi_stat, p_value, reject
 
 
@@ -47,7 +52,12 @@ def expected_normal_counts(_bins, _mu, _std, _num_samples):
     expected_counts = None
 
     # YOUR CODE HERE #
-
+def expected_normal_counts(_bins, _mu, _std, _num_samples):
+    """
+    Expected number of samples in each bin if the samples come from a normal distribution
+    """
+    probabilities = np.diff(norm.cdf(_bins, loc=_mu, scale=_std))
+    expected_counts = probabilities * _num_samples
     return expected_counts
 
 
@@ -70,8 +80,44 @@ def normal_fit_test(_samples, _alpha):
     reject = None
 
     # YOUR CODE HERE #
+def normal_fit_test(_samples, _alpha):
+    """
+    Test whether samples could come from a fitted normal distribution
+    """
+    # Step 1: Fit the samples to a normal distribution
+    fitted_mean, fitted_std = norm.fit(_samples)
+
+    # Step 2: Create 9 finite bin edges and add infinite outer edges
+    bins = np.r_[
+        -np.inf,
+        np.linspace(
+            fitted_mean - 2 * fitted_std,
+            fitted_mean + 2 * fitted_std,
+            9
+        ),
+        np.inf
+    ]
+
+    # Step 3: Calculate observed counts in each bin
+    observed_counts, _ = np.histogram(_samples, bins=bins)
+
+    # Step 4: Calculate expected counts
+    expected_counts = expected_normal_counts(
+        bins, fitted_mean, fitted_std, len(_samples)
+    )
+
+    # Step 5: Perform the chi-square test
+    chi_stat, p_value = chisquare(
+        f_obs=observed_counts,
+        f_exp=expected_counts,
+        ddof=2
+    )
+
+    reject = p_value < _alpha
 
     return chi_stat, p_value, reject
+
+
 
 
 if __name__ == "__main__":

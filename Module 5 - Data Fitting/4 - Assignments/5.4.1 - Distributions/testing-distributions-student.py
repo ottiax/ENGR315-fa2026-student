@@ -34,7 +34,11 @@ def fit_normal(_samples):
     fitted_std = None
 
     # YOUR CODE HERE #
-
+def fit_normal(_samples):
+    """
+    Fit samples to a normal distribution.
+    """
+    fitted_mean, fitted_std = norm.fit(_samples)
     return fitted_mean, fitted_std
 
 
@@ -49,7 +53,11 @@ def fit_exponential(_samples):
     fit_beta = None
 
     # YOUR CODE HERE #
-
+def fit_exponential(_samples):
+    """
+    Fit samples to an exponential distribution that starts at 0.
+    """
+    fit_loc, fit_beta = expon.fit(_samples, floc=0)
     return fit_beta
 
 
@@ -66,7 +74,17 @@ def normal_range(_samples, _fraction):
     upper = None
 
     # YOUR CODE HERE #
+def normal_range(_samples, _fraction):
+    """
+    Find the middle fraction of the fitted normal distribution.
+    """
+    fitted_mean, fitted_std = fit_normal(_samples)
 
+    lower, upper = norm.interval(
+        _fraction,
+        loc=fitted_mean,
+        scale=fitted_std
+    )
     return lower, upper
 
 

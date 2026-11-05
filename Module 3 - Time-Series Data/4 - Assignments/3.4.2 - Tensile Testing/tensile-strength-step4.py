@@ -152,7 +152,6 @@ def calculate_percent_offset(slope, strain, stress):
     # Find the closest point to the offset line
         intercept_index = valid_indices
     np.argmin(distance[valid_indices])
-    
 
     if __name__ == "__main__":
      import matplotlib.pyplot as plt
