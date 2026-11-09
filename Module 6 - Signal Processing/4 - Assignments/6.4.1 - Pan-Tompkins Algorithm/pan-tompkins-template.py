@@ -1,4 +1,8 @@
+import os
+from time import time
+
 import numpy as np
+from scipy.signal import butter, filtfilt, find_peaks
 from ekg_testbench import EKGTestBench
 
 def detect_heartbeats(filepath):
@@ -10,41 +14,94 @@ def detect_heartbeats(filepath):
     """
     if filepath == '':
         return list()
-
+    
     # import the CSV file using numpy
-    path = filepath
 
-    # load data in matrix from CSV file; skip first two rows
-    ## your code here
+    data = np.loadtxt(filepath, delimiter=',', skiprows=2)
 
     # save each vector as own variable
-    ## your code here
+    time = data[:, 0]
+    MLII = data[:, 1]
+    V5 = data[:, 2]
 
     # identify one column to process. Call that column signal
-
-    signal = -1 ## your code here
+    signal = MLII
 
     # pass data through LOW PASS FILTER (OPTIONAL)
     ## your code here
+    dt = np.median(np.diff(time))
+    fs = 1 / dt
+    low_cutoff = 15
+
+    b, a = butter(
+        2,
+        low_cutoff / (fs / 2),
+        btype='low'
+    )
+
+    low_pass = filtfilt(b, a, signal)
 
     # pass data through HIGH PASS FILTER (OPTIONAL) to create BAND PASS result
     ## your code here
+    high_cutoff = 5
 
+    b, a = butter(
+        2,
+        high_cutoff / (fs / 2),
+        btype='high'
+    )
+
+    filtered_signal = filtfilt(b, a, low_pass)
     # pass data through differentiator
     ## your code here
-
+    differentiated = np.diff(
+        filtered_signal,
+        prepend=filtered_signal[0]
+    )
     # pass data through square function
     ## your code here
+    squared = differentiated ** 2
 
     # pass through moving average window
     ## your code here
+    window_size = int(0.150 * fs)
+
+    window = np.ones(window_size) / window_size
+
+    averaged = np.convolve(
+        squared,
+        window,
+        mode='same'
+    )
 
     # use find_peaks to identify peaks within averaged/filtered data
     # save the peaks result and return as part of testbench result
 
     ## your code here peaks,_ = find_peaks(....)
+    candidate_peaks, properties = find_peaks(
+        averaged,
+        distance=int(0.25 * fs),
+        prominence=0.5 * np.std(averaged)
+    )
 
-    beats = None
+    beats = candidate_peaks
+    beats = []
+
+    search_window = int(0.10 * fs)
+
+    for peak in candidate_peaks:
+
+        left = max(0, peak - search_window)
+        right = min(len(filtered_signal), peak + search_window + 1)
+
+        actual_peak = left + np.argmax(
+            filtered_signal[left:right]
+        )
+
+        beats.append(actual_peak)
+
+    # Convert to NumPy array
+    beats = np.array(sorted(set(beats)))
 
     # do not modify this line
     return signal, beats
