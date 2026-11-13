@@ -25,7 +25,8 @@ def direct_solve(_A, _b):
     currents = None
 
     # YOUR CODE HERE #
-
+    currents = np.linalg.solve(_A, _b)
+    
     return currents
 
 
@@ -40,6 +41,8 @@ def verify_solution(_A, _b, _x):
     matches = None
 
     # YOUR CODE HERE #
+    calculated_b = np.dot(_A, _x)
+    matches = bool(np.allclose(calculated_b, _b))
 
     return calculated_b, matches
 
@@ -62,8 +65,30 @@ def jacobi_solve(_A, _b, _tolerance=0.001, _max_iterations=100):
     converged = None
 
     # YOUR CODE HERE #
+    A = np.asarray(_A, dtype=float)
+    b = np.asarray(_b, dtype=float)
 
-    return x, iterations, converged
+    diagonal = np.diag(A)
+
+    R = A - np.diag(diagonal)
+
+    x = np.zeros(len(b))
+
+    iterations = 0
+    converged = False
+
+    for i in range(_max_iterations):
+        x_new = (b - np.dot(R, x)) / diagonal
+        iterations += 1
+
+        if np.max(np.abs(x_new - x)) < _tolerance:
+            converged = True
+            x = x_new
+            break
+
+        x = x_new
+
+    return x, iterations, bool(converged)
 
 
 def scipy_iterative_solve(_A, _b, _rtol=1e-5):
@@ -78,6 +103,8 @@ def scipy_iterative_solve(_A, _b, _rtol=1e-5):
 
     # YOUR CODE HERE #
 
+    x, info = cg(_A, _b, rtol=_rtol)
+    
     return x, info
 
 
